@@ -30,7 +30,7 @@ def getExp(user_id):
     cur.close()
     conn.close()
 
-    return row[0]
+    return row[0][0]
 
 
 def getLastCheck(user_id, table_name):
@@ -68,9 +68,8 @@ def addExp(user_id, points, table_name, column_name):
     total_exp = getExp(user_id)
     total_exp_upd = total_exp + points 
 
-    cur.execute(
-                f'UPDATE {table_name} SET {column_name} = ? WHERE user_id = ?', 
-                (total_exp_upd, user_id))
+    cur.execute(f'UPDATE {table_name} SET {column_name} = ? WHERE user_id = ?', 
+                (total_exp_upd, user_id,))
     conn.commit()
 
     cur.close()
@@ -95,10 +94,11 @@ def addUser(user_id, table_name):
     conn.close()
 
 
-def checkTime(last_check):
+def checkTime(last_check, time_in_sec):
     '''
     Check if it's been more than 1 hour since last check. 
-    Takes 
+    Takes last check in ISO format, time to compare with 
+    in seconds.
     
     Returns current datetime object or None.
     '''
@@ -117,7 +117,7 @@ def checkTime(last_check):
         return today
 
     # Do the actual check
-    if td.total.total_seconds <= 60*60:
+    if td.total.total_seconds <= time_in_sec:
         datetime.fromisoformat(last_check)
         return None
 
