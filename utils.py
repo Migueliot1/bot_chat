@@ -5,6 +5,8 @@ from datetime import datetime
 from datetime import timedelta as classic_td
 from hidden import get_db_name
 
+# Get db's file name from the hidden file
+DB_NAME = get_db_name()
 
 def getExp(user_id):
     '''
@@ -13,12 +15,10 @@ def getExp(user_id):
     If there is no user in the db, add them there.
     '''
 
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     cur.execute('SELECT total_exp FROM dungeon_users WHERE user_id=?', (user_id,))
-    results = list()
-
     row = cur.fetchall()
     
     # Add user to the database if unable 
@@ -27,15 +27,10 @@ def getExp(user_id):
         addUser(user_id, 'dungeon_users')
         return None
 
-    results.append(row[0])
-
     cur.close()
     conn.close()
 
-
-    result = results[0]
-
-    return result[0]
+    return row[0]
 
 
 def getLastCheck(user_id):
@@ -43,7 +38,7 @@ def getLastCheck(user_id):
     Return last check time for the passed user.
     '''
 
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     cur.execute('SELECT last_check FROM dungeon_users WHERE user_id=?', (user_id,))
@@ -64,7 +59,7 @@ def addExp(user_id, exp):
     Needed arguments: user's id in the db, amount 
     of added exp.
     '''
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     total_exp = getExp(user_id)
@@ -87,7 +82,7 @@ def addUser(user_id, table_name):
     Passed arguments: user_id, table_name.
     '''
 
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     cur.execute(f'INSERT OR IGNORE INTO {table_name} (user_id) VALUES (?)', (user_id,))
@@ -133,7 +128,7 @@ def saveCheckTime(user_id, today):
     Takes user's id in the database and the current datetime object  
     as arguments.
     '''
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     today_iso = today.isoformat()
@@ -213,7 +208,7 @@ def getRandomMsg(checkBool):
         db_pos_or_neg = 'dungeon_encounters_neg'
 
     
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     # Get total amount of rows
@@ -241,7 +236,7 @@ def addRow(value, column_name, table_name):
     Adds a new value into the database in the row 
     with only 1 column.
     '''
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     cur.execute(f'INSERT OR IGNORE INTO {table_name} ({column_name}) VALUES (?)', (value, ))
@@ -254,7 +249,7 @@ def addRow(value, column_name, table_name):
 def getLevel(user_id):
     '''Return a current level of the passed user.'''
     
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     cur.execute('SELECT current_level FROM dungeon_users WHERE user_id=?', (user_id,))
@@ -283,7 +278,7 @@ def checkLevelUp(user_id):
 
     Return True if there was a level up and False if not.
     '''
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     # Get current level
@@ -319,7 +314,7 @@ def checkLevelDown(user_id):
 
     Return True if there was a level up and False if not.
     '''
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     # Get current level
@@ -357,7 +352,7 @@ def checkLevelDown(user_id):
 def getDungeonUserInfo(user_id):
     '''Return a tuple of user's total experience and level.'''
     
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     cur.execute('SELECT total_exp, current_level FROM dungeon_users WHERE user_id=?', (user_id,))
@@ -377,7 +372,7 @@ def getExpForLvlUp(user_id):
     level up.
     '''
     
-    conn = sqlite3.connect(get_db_name())
+    conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     # Get a current level of the passed user
