@@ -33,15 +33,17 @@ def getExp(user_id):
     return row[0]
 
 
-def getLastCheck(user_id):
+def getLastCheck(user_id, table_name):
     '''
-    Return last check time for the passed user.
+    Return last check time for the passed user in the given table.
+
+    Passed arguments: user_id, table_name in the db.
     '''
 
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
-    cur.execute('SELECT last_check FROM dungeon_users WHERE user_id=?', (user_id,))
+    cur.execute(f'SELECT last_check FROM {table_name} WHERE user_id=?', (user_id,))
     row = cur.fetchone()
     last_check = row[0]
 
@@ -51,22 +53,23 @@ def getLastCheck(user_id):
     return last_check
     
 
-def addExp(user_id, exp):
+def addExp(user_id, points, table_name, column_name):
     '''
-    Adds a given amount of exp to the given user in the 
-    database.
+    Adds a given amount of exp/points to the given user in the 
+    database, table's name, and name of the column which stores 
+    exp/points.
 
     Needed arguments: user's id in the db, amount 
-    of added exp.
+    of added points
     '''
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
     total_exp = getExp(user_id)
-    total_exp_upd = total_exp + exp 
+    total_exp_upd = total_exp + points 
 
     cur.execute(
-                'UPDATE dungeon_users SET total_exp = ? WHERE user_id = ?', 
+                f'UPDATE {table_name} SET {column_name} = ? WHERE user_id = ?', 
                 (total_exp_upd, user_id))
     conn.commit()
 
@@ -121,12 +124,12 @@ def checkTime(last_check):
     return today
 
 
-def saveCheckTime(user_id, today):
+def saveCheckTime(user_id, today, table_name):
     '''
     Save current check time to the database.
     
-    Takes user's id in the database and the current datetime object  
-    as arguments.
+    Takes user's id in the database, the current datetime object, 
+    and table's name as arguments.
     '''
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
@@ -134,7 +137,7 @@ def saveCheckTime(user_id, today):
     today_iso = today.isoformat()
 
     cur.execute(
-                'UPDATE dungeon_users SET last_check = ? WHERE user_id = ?', 
+                f'UPDATE {table_name} SET last_check = ? WHERE user_id = ?', 
                 (today_iso, user_id))
     conn.commit()
 
