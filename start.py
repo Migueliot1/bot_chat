@@ -18,7 +18,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 
 from hidden import get_token
 from utils import checkLevelUp, checkLevelDown, getExpForLvlUp, checkTime, getRandomMsg, getTimeDifference, saveCheckTime, makeRoll, addExp, getLastCheck, getLevel, getDungeonUserInfo, scaleRoll
-
+from utils_roulette import getPoints
 
 try:
     from telegram import __version_info__
@@ -64,16 +64,20 @@ async def stepIntoDungeon(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     user_id = user['id']
     user_fname = user['first_name']
 
+    # Table and column names
+    table_name = 'dungeon_users'
+    column_name = 'total_exp'
+
     # Check current exp and last check time
-    last_check = getLastCheck(user_id) # In ISO format
+    last_check = getLastCheck(user_id, table_name) # In ISO format
 
     msg = f'{user_fname} | '
     # Check if it's been enough time since last check
-    time_check = checkTime(last_check)
+    time_check = checkTime(last_check, 3600)
     if time_check != None:
 
         # Save new check time
-        saveCheckTime(user_id, time_check)
+        saveCheckTime(user_id, time_check, table_name)
 
         # Roll for some exp and scale it according to user's lvl
         roll = makeRoll()
@@ -95,7 +99,7 @@ async def stepIntoDungeon(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     
         # Add rolled amount to the current exp amount in the db
         if roll != 0:
-            addExp(user_id, roll)
+            addExp(user_id, roll, table_name, column_name)
 
             # Send a message if there was a level up
             if checkLevelUp(user_id):
