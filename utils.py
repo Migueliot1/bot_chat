@@ -24,7 +24,7 @@ def getExp(user_id):
     # Add user to the database if unable 
     # to get any data from it
     if len(row) == 0:
-        addUser(user_id)
+        addUser(user_id, 'dungeon_users')
         return None
 
     results.append(row[0])
@@ -79,13 +79,18 @@ def addExp(user_id, exp):
     conn.close()
 
 
-def addUser(user_id):
-    '''Create an instance in the database for a given user.'''
+def addUser(user_id, table_name):
+    '''
+    Create an instance in the given table in the database 
+    for a given user.
+    
+    Passed arguments: user_id, table_name.
+    '''
 
     conn = sqlite3.connect(get_db_name())
     cur = conn.cursor()
 
-    cur.execute('INSERT OR IGNORE INTO dungeon_users (user_id) VALUES (?)', (user_id,))
+    cur.execute(f'INSERT OR IGNORE INTO {table_name} (user_id) VALUES (?)', (user_id,))
     conn.commit()
 
     cur.close()
